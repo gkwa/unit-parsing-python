@@ -1,6 +1,6 @@
 import pytest
 
-from unitparsing_pkg.prices import Bundle, UnitPrice
+from unitparsing_pkg.prices import Bundle, ParseQuantityException, UnitPrice
 
 
 def test_unit_price():
@@ -35,17 +35,17 @@ def test_fraction_without_spaces_causes_exception():
 
 
 def test_missing_units_should_raise_exception():
-    with pytest.raises(ValueError):
+    with pytest.raises(ParseQuantityException):
         UnitPrice().quantity("1.3 easter egg")
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ParseQuantityException):
         UnitPrice().quantity(
             "Signature Cafe Pacific Coast Style Clam Chowder Soup - 23c "
         )
 
 
 def test_quantity_with_assert_equals():
-    with pytest.raises(ValueError):
+    with pytest.raises(ParseQuantityException):
         UnitPrice().quantity("1.3 cantspell")
 
 
