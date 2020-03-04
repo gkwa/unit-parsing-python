@@ -3,6 +3,25 @@ import pytest
 from unitparsing_pkg.prices import Bundle, UnitPrice
 
 
+def test_unit_price():
+    with pytest.raises(ValueError):
+        UnitPrice().unit_price(" / oz")
+    with pytest.raises(ValueError):
+        UnitPrice().unit_price("/ oz")
+    with pytest.raises(ValueError):
+        UnitPrice().unit_price("per 3 oz")
+    assert (5.49, "pt") == UnitPrice().unit_price("5.49per pt")
+    assert (5.49, "pt") == UnitPrice().unit_price("5.49 per pt")
+    assert (5.49, "pt") == UnitPrice().unit_price("5.49 // pt")
+    assert (5.49, "oz") == UnitPrice().unit_price("5.49 - oz")
+    assert (5.49, "pt") == UnitPrice().unit_price("5.49 / pt")
+    assert (5.49, "pint") == UnitPrice().unit_price("5.49 / pint")
+    with pytest.raises(ValueError):
+        UnitPrice().unit_price("5.49 / ")
+    assert (5.49, "oz") == UnitPrice().unit_price("5.49 / oz")
+    assert (0.343125, "oz") == UnitPrice().unit_price("5.49/lb")
+
+
 def test_multiple_quantities_in_one_string_will_take_the_first_pair():
     assert Bundle(61, "oz") == UnitPrice().quantity("4 ct / 15.25 oz 5 ct / 15.25 oz")
 

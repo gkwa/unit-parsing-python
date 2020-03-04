@@ -17,6 +17,10 @@ import pathlib
 import re
 
 
+class ParseQuantityException(Exception):
+    """Base class for other exceptions"""
+
+
 class Bundle:
     def __init__(self, amount, unit):
         self.amount = amount
@@ -268,6 +272,45 @@ class UnitPrice:
         re.IGNORECASE | re.VERBOSE,
     )
 
+    pat_unit_price = re.compile(
+        r"""
+        .*?
+        (?P<qty>[\.\d]+)
+        \s*
+        (?:
+        / | per | -
+        )+
+        \s*
+        (?P<unit>
+        lb 
+        | oz 
+        | \bea\b | \beach\b
+        | \bpint\b | \bpt\b
+        )
+        """,
+        flags=re.IGNORECASE | re.VERBOSE,
+    )
+
+    @classmethod
+    def unit_price(cls, text):
+        def convert_oz(qty, unit):
+            if unit != "lb":
+                return qty, unit
+            else:
+                qty /= cls.OZ_PER_LB
+                unit = "oz"
+                return qty, unit
+
+        orig = text
+        text = text.lower()
+        if match := re.match(cls.pat_unit_price, text):
+            qty = float(match.group("qty"))
+            unit = match.group("unit")
+            qty, unit = convert_oz(qty, unit)
+            return qty, unit
+        else:
+            raise ValueError(f"can't match text {orig}")
+
     @classmethod
     def quantity(cls, text):
         def frac(str_):
@@ -341,7 +384,7 @@ class UnitPrice:
             result = Bundle(qty * cls.OZ_PER_QUART, "oz")
 
         else:
-            raise ValueError(f"can't match quantity on string '{text}'")
+            raise ParseQuantityException(f"can't match quantity on string '{text}'")
 
         return result
 
