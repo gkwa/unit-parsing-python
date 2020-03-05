@@ -1,5 +1,5 @@
 """
->>> b = UnitPrice().quantity("1/2 / lb")
+>>> b = UnitPrice.quantity("1/2 / lb")
 >>> b.amount
 8.0
 >>> b.unit
@@ -7,7 +7,7 @@
 >>> b.unit=='oz'
 True
 >>> from unitparsing_pkg.prices import Bundle, UnitPrice
->>> Bundle(8, "oz") == UnitPrice().quantity("1/2 / lb")
+>>> Bundle(8, "oz") == UnitPrice.quantity("1/2 / lb")
 True
 """
 
@@ -279,7 +279,7 @@ class UnitPrice:
         \s*
         (?:
         / | per | -
-        )+
+        )*
         \s*
         (?P<unit>
         lb 
@@ -292,24 +292,25 @@ class UnitPrice:
     )
 
     @classmethod
-    def unit_price(cls, text):
-        def convert_oz(qty, unit):
-            if unit != "lb":
-                return qty, unit
-            else:
-                qty /= cls.OZ_PER_LB
-                unit = "oz"
-                return qty, unit
+    def _convert_oz(cls, qty, unit):
+        if unit != "lb":
+            return qty, unit
+        else:
+            qty /= cls.OZ_PER_LB
+            unit = "oz"
+            return qty, unit
 
+    @classmethod
+    def unit_price(cls, text):
         orig = text
+        text = str(text)  # text might not be string, could be float, int
         text = text.lower()
         if match := re.match(cls.pat_unit_price, text):
             qty = float(match.group("qty"))
             unit = match.group("unit")
-            qty, unit = convert_oz(qty, unit)
+            qty, unit = cls._convert_oz(qty, unit)
             return qty, unit
-        else:
-            raise ValueError(f"can't match text {orig}")
+        raise ValueError(f"can't match text {orig}")
 
     @classmethod
     def quantity(cls, text):
