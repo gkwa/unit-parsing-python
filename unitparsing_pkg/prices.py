@@ -73,18 +73,6 @@ class UnitPrice:
         re.IGNORECASE | re.VERBOSE,
     )
 
-    # 1/2 oz
-    # 32 oz
-    pat_oz_2 = re.compile(
-        r"""
-        .*?
-        (?P<qty>[\.\d/]+)
-        \s*
-        \bOZ\b
-        """,
-        re.IGNORECASE | re.VERBOSE,
-    )
-
     # 3.4 Fl Oz
     pat_oz_3 = re.compile(
         r"""
@@ -169,6 +157,7 @@ class UnitPrice:
         \s*
         (?P<unit>
           pts?\b | pints?\b
+        | ozs?\b | ounces?\b
         | qt\b | quarts?\b
         | gal\b | gallons?\b
         )
@@ -363,6 +352,8 @@ class UnitPrice:
             unit = match.group("unit")
             if unit.lower() in ["pt", "pint", "pints"]:
                 result = Bundle(number * qty * cls.OZ_PER_PINT, "oz")
+            elif unit.lower() in ["oz", "ozs", "ounce", "ounces"]:
+                result = Bundle(number * qty, "oz")
             elif unit.lower() in ["qt", "quart", "quarts"]:
                 result = Bundle(number * qty * cls.OZ_PER_QUART, "oz")
             elif unit.lower() in ["gal", "gallon", "gallons"]:
@@ -408,10 +399,6 @@ class UnitPrice:
         elif match := re.match(cls.pat_ml, text):
             qty = frac(match.group("qty"))
             result = Bundle(qty / cls.ML_PER_OZ, "oz")
-
-        elif match := re.match(cls.pat_oz_2, text):
-            qty = frac(match.group("qty"))
-            result = Bundle(qty, "oz")
 
         elif match := re.match(cls.pat_oz_3, text):
             qty = frac(match.group("qty"))
