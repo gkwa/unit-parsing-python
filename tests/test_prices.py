@@ -144,7 +144,6 @@ def test_quantity():
     assert Bundle(640, "oz") == UnitPrice.quantity("16 ct / 40 oz")
     assert Bundle(1219.1999999999998, "oz") == UnitPrice.quantity("24 ct / 50.8 oz")
 
-    assert Bundle(16.1, "oz") == UnitPrice.quantity("1 pint")
     assert Bundle(16, "oz") == UnitPrice.quantity("1 pint")
     assert Bundle(16, "oz") == UnitPrice.quantity("1  pint ")
     assert Bundle(16, "oz") == UnitPrice.quantity("1 pt")
