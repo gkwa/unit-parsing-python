@@ -139,6 +139,7 @@ def test_quantity():
     assert Bundle(0.5, "oz") == UnitPrice.quantity("1/2 oz ")
     assert Bundle(8, "oz") == UnitPrice.quantity("1/2 / lb")
     assert Bundle(8, "oz") == UnitPrice.quantity("1/2 /lb")
+    assert Bundle(1.5, "oz") == UnitPrice.quantity("3 1/2 oz")
     assert Bundle(10, "oz") == UnitPrice.quantity("10 oz")
     assert Bundle(10, "oz") == UnitPrice.quantity("10 Oz")
     assert Bundle(10.5, "oz") == UnitPrice.quantity("10.5 oz")
