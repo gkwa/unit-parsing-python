@@ -171,6 +171,7 @@ class UnitPrice:
           pt\b | pints?\b
         | qt\b | quarts?\b
         | gal\b | gallons?\b
+        | lbs?\b | pounds?\b
         )
         """,
         re.IGNORECASE | re.VERBOSE,
@@ -267,21 +268,6 @@ class UnitPrice:
         re.IGNORECASE | re.VERBOSE,
     )
 
-    # 3 lb
-    # 3.4 / lb
-    # 1/2 lb
-    pat_lb = re.compile(
-        r"""
-        .*?
-        (?P<qty>[\.\d/]+)
-        \s*
-        /?
-        \s*
-        LB\b
-        """,
-        re.IGNORECASE | re.VERBOSE,
-    )
-
     pat_unit_price = re.compile(
         r"""
         .*?
@@ -367,6 +353,8 @@ class UnitPrice:
                 result = Bundle(number * qty * cls.OZ_PER_QUART, "oz")
             elif unit.lower() in ["gal", "gallon", "gallons"]:
                 result = Bundle(number * qty * cls.OZ_PER_GAL, "oz")
+            elif unit.lower() in ["lb", "lbs", "pounds"]:
+                result = Bundle(number * qty * cls.OZ_PER_LB, "oz")
             else:
                 raise ValueError("something went wrong with pat_pint_quart parsing")
 
@@ -397,10 +385,6 @@ class UnitPrice:
         elif match := re.match(cls.pat_gallon_2, text):
             qty = frac(match.group("qty") or "1")
             result = Bundle(qty * 0.5 * cls.OZ_PER_GAL, "oz")
-
-        elif match := re.match(cls.pat_lb, text):
-            qty = frac(match.group("qty"))
-            result = Bundle(qty * cls.OZ_PER_LB, "oz")
 
         elif match := re.match(cls.pat_lb_4, text):
             result = Bundle(1 * cls.OZ_PER_LB, "oz")
