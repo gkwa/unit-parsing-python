@@ -135,20 +135,6 @@ class UnitPrice:
         re.IGNORECASE | re.VERBOSE,
     )
 
-    # 3.2 Gal
-    # 10 Gallons
-    # 1/2 Gal
-    pat_gallon_1 = re.compile(
-        r"""
-        .*?
-        (?P<qty>[\.\d/]+)
-        \s*
-        (?:Gallon|Gal)
-        \b
-        """,
-        re.IGNORECASE | re.VERBOSE,
-    )
-
     # 3 half gal
     pat_gallon_2 = re.compile(
         r"""
@@ -163,24 +149,17 @@ class UnitPrice:
         re.IGNORECASE | re.VERBOSE,
     )
 
-    # 3 quarts
-    pat_quart = re.compile(
-        r"""
-        .*?
-        (?P<qty>[\.\d/]+)
-        \s*
-        Quarts?
-        \b
-        """,
-        re.IGNORECASE | re.VERBOSE,
-    )
-
+    # 1 qt
+    # 3/4 1/2 quarts
+    # 3 1/2 quart
+    # 1/2 quart
+    # 1 quart
     # 1 pt
     # 3/4 1/2 pint
     # 3 1/2 pint
     # 1/2 pint
     # 1 pint
-    pat_pint = re.compile(
+    pat_pint_quart = re.compile(
         r"""
         .*?
         \s*
@@ -188,7 +167,11 @@ class UnitPrice:
         \s*
         (?P<qty>[\.\d/]+)
         \s*
-        (?: pint\b | pt\b)
+        (?P<unit>
+          pt\b | pints?\b
+        | qt\b | quarts?\b
+        | gal\b | gallons?\b
+        )
         """,
         re.IGNORECASE | re.VERBOSE,
     )
@@ -374,10 +357,18 @@ class UnitPrice:
             number = float(match.group("num"))
             result = Bundle(qty * number, "oz")
 
-        elif match := re.match(cls.pat_pint, text):
+        elif match := re.match(cls.pat_pint_quart, text):
             number = float(frac(match.group("num") or "1"))
             qty = frac(match.group("qty"))
-            result = Bundle(number * qty * cls.OZ_PER_PINT, "oz")
+            unit = match.group("unit")
+            if unit.lower() in ["pt", "pint", "pints"]:
+                result = Bundle(number * qty * cls.OZ_PER_PINT, "oz")
+            elif unit.lower() in ["qt", "quart", "quarts"]:
+                result = Bundle(number * qty * cls.OZ_PER_QUART, "oz")
+            elif unit.lower() in ["gal", "gallon", "gallons"]:
+                result = Bundle(number * qty * cls.OZ_PER_GAL, "oz")
+            else:
+                raise ValueError("something went wrong with pat_pint_quart parsing")
 
         elif match := re.match(cls.pat_pack, text):
             qty = frac(match.group("qty"))
@@ -402,10 +393,6 @@ class UnitPrice:
 
         elif match := re.match(cls.pat_each_2, text):
             result = Bundle(1, "each")
-
-        elif match := re.match(cls.pat_gallon_1, text):
-            qty = frac(match.group("qty"))
-            result = Bundle(qty * cls.OZ_PER_GAL, "oz")
 
         elif match := re.match(cls.pat_gallon_2, text):
             qty = frac(match.group("qty") or "1")
@@ -434,10 +421,6 @@ class UnitPrice:
             qty = frac(match.group("qty"))
             number = float(match.group("num"))
             result = Bundle(qty * number, "oz")
-
-        elif match := re.match(cls.pat_quart, text):
-            qty = frac(match.group("qty"))
-            result = Bundle(qty * cls.OZ_PER_QUART, "oz")
 
         else:
             raise ParseQuantityException(f"can't match quantity on string '{text}'")
