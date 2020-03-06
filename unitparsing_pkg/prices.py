@@ -14,10 +14,15 @@ True
 import fractions
 import logging
 import pathlib
+import pprint
 import re
 
 
 class ParseQuantityException(Exception):
+    """Base class for other exceptions"""
+
+
+class CaculateUnitPriceException(Exception):
     """Base class for other exceptions"""
 
 
@@ -170,7 +175,7 @@ class UnitPrice:
     pat_each_2 = re.compile(
         r"""
         .*?
-        [^\d\.]+
+        [^\d\.]?
         \s*
         Each
         \b
@@ -275,15 +280,20 @@ class UnitPrice:
     pat_unit_price = re.compile(
         r"""
         .*?
-        (?P<qty>[\.\d]+)
+        (?P<dollars>[\.\d]+)
         \s*
         (?:
         / | per | -
         )*
         \s*
+        (?P<qty>[\.\d]+)?
+        \s*
         (?P<unit>
         lb 
         | oz 
+        | \bpk\b | \bpack\b
+        | \bct\b | \bcount\b
+        | \bml\b
         | \bea\b | \beach\b
         | \bpint\b | \bpt\b
         )
@@ -293,12 +303,15 @@ class UnitPrice:
 
     @classmethod
     def _convert_oz(cls, qty, unit):
-        if unit != "lb":
-            return qty, unit
-        else:
+        if unit == "lb":
             qty /= cls.OZ_PER_LB
             unit = "oz"
             return qty, unit
+        elif unit == "ml":
+            qty /= cls.ML_PER_OZ
+            unit = "oz"
+            return qty, unit
+        return qty, unit
 
     @classmethod
     def unit_price(cls, text):
@@ -306,17 +319,32 @@ class UnitPrice:
         text = str(text)  # text might not be string, could be float, int
         text = text.lower()
         if match := re.match(cls.pat_unit_price, text):
-            qty = float(match.group("qty"))
+            dollars = float(match.group("dollars"))
+            qty = float(match.group("qty") or 1)
             unit = match.group("unit")
-            qty, unit = cls._convert_oz(qty, unit)
+            if unit:
+                unit = unit.lower().strip()
+                if unit == "pk" or unit == "pack":
+                    unit = "each"
+            qty, unit = cls._convert_oz(dollars / qty, unit)
             return qty, unit
-        raise ValueError(f"can't match text {orig}")
+        raise CaculateUnitPriceException(
+            f"can't generate unit price from text '{orig}'"
+        )
 
     @classmethod
     def quantity(cls, text):
         def frac(str_):
             """ 1/2 to 0.5 """
             return float(sum(fractions.Fraction(s) for s in str_.split()))
+
+        text = "" if text is None else text
+
+        if not isinstance(text, str):
+            pf = pprint.pformat(text)
+            raise ParseQuantityException(
+                f"I'm expecting a string for text '{text}' but faound a {type(text)} instead"
+            )
 
         result = None
         if match := re.match(cls.pat_oz_4, text):
@@ -365,7 +393,7 @@ class UnitPrice:
 
         elif match := re.match(cls.pat_ml, text):
             qty = frac(match.group("qty"))
-            result = Bundle(qty * cls.ML_PER_OZ, "oz")
+            result = Bundle(qty / cls.ML_PER_OZ, "oz")
 
         elif match := re.match(cls.pat_oz_2, text):
             qty = frac(match.group("qty"))

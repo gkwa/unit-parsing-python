@@ -1,20 +1,28 @@
 import pytest
 
-from unitparsing_pkg.prices import Bundle, ParseQuantityException, UnitPrice
+from unitparsing_pkg.prices import Bundle, CaculateUnitPriceException, ParseQuantityException, UnitPrice
 
 
 def test_unit_price():
-    with pytest.raises(ValueError):
+    with pytest.raises(CaculateUnitPriceException):
         UnitPrice.unit_price(" / oz")
-    with pytest.raises(ValueError):
+    with pytest.raises(CaculateUnitPriceException):
         UnitPrice.unit_price("/ oz")
+
+    # FIXME DO THIS, I STOPPED BECAUSE I STARTED CREATING A MESS WITH UNIT_PARSE FUNCTION
+    # =7.99 / (300 / 29.5735)
+    # =7.99 / 300
+#    assert (0.7876408833333334, "oz") == UnitPrice.unit_price("$7.99 / 300 ML")
+    assert (0.0499, "each") == UnitPrice.unit_price("4.99/100 pk")
+    assert (1.345, "count") == UnitPrice.unit_price("2.69/2 count")
+    assert (1.345, "count") == UnitPrice.unit_price("2.69/2 count")
     assert (5.49, "pt") == UnitPrice.unit_price("5.49per pt")
     assert (5.49, "pt") == UnitPrice.unit_price("5.49 per pt")
     assert (5.49, "pt") == UnitPrice.unit_price("5.49 // pt")
     assert (5.49, "oz") == UnitPrice.unit_price("5.49 - oz")
     assert (5.49, "pt") == UnitPrice.unit_price("5.49 / pt")
     assert (5.49, "pint") == UnitPrice.unit_price("5.49 / pint")
-    with pytest.raises(ValueError):
+    with pytest.raises(CaculateUnitPriceException):
         UnitPrice.unit_price("5.49 / ")
     assert (5.49, "oz") == UnitPrice.unit_price("5.49 / oz")
     assert (0.343125, "oz") == UnitPrice.unit_price("5.49/lb")
@@ -46,6 +54,10 @@ def test_missing_units_should_raise_exception():
             "Signature Cafe Pacific Coast Style Clam Chowder Soup - 23c "
         )
 
+def test_getting_quantity_from_empty_string():
+    with pytest.raises(ParseQuantityException):
+        UnitPrice.quantity(None)
+
 
 def test_quantity_with_assert_equals():
     with pytest.raises(ParseQuantityException):
@@ -61,9 +73,15 @@ def test_quantity():
     assert Bundle(30, "count") == UnitPrice.quantity(
         "Mission White Corn Tortillas - 30 Count"
     )
+    # FIXME
+#    assert Bundle(10.144216950986525, "oz") == UnitPrice.quantity("300 ML")
+    assert Bundle(100, "pack") == UnitPrice.quantity(" 100 pack ")
+    assert Bundle(100, "pack") == UnitPrice.quantity("100pack")
+    assert Bundle(100, "pack") == UnitPrice.quantity("100 pk")
+    assert Bundle(2, "count") == UnitPrice.quantity("2 ct")
     assert Bundle(1, "count") == UnitPrice.quantity("1 ct")
-    assert Bundle(1 / 2, "count") == UnitPrice.quantity("1/2ct")
-    assert Bundle(1 / 8, "count") == UnitPrice.quantity("1/8count")
+    assert Bundle(0.5, "count") == UnitPrice.quantity("1/2ct")
+    assert Bundle(0.125, "count") == UnitPrice.quantity("1/8count")
     assert Bundle(0.5, "count") == UnitPrice.quantity(
         "Signature Cafe Pacific Coast Style Clam Chowder Soup 1/2 count 3/4 count"
     )
@@ -95,6 +113,7 @@ def test_quantity():
     assert Bundle(1, "each") == UnitPrice.quantity("Seedless Mini Watermelon - Each")
     assert Bundle(1.3, "each") == UnitPrice.quantity("1.3 ea")
     assert Bundle(1, "each") == UnitPrice.quantity("1 each")
+    assert Bundle(1, "each") == UnitPrice.quantity("each")
     assert Bundle(1, "each") == UnitPrice.quantity("1each")
 
     assert Bundle(0.5, "pack") == UnitPrice.quantity("0.5pk")
