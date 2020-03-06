@@ -178,4 +178,3 @@ def test_quantity():
     assert Bundle(192, "oz") == UnitPrice.quantity("3 1/2 gal")
     assert Bundle(64, "oz") == UnitPrice.quantity("1/2gal")
     assert Bundle(64, "oz") == UnitPrice.quantity("1/2 gal")
-    

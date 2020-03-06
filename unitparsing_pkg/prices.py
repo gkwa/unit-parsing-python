@@ -168,7 +168,7 @@ class UnitPrice:
         (?P<qty>[\.\d/]+)
         \s*
         (?P<unit>
-          pt\b | pints?\b
+          pts?\b | pints?\b
         | qt\b | quarts?\b
         | gal\b | gallons?\b
         )
