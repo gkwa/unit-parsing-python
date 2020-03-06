@@ -41,6 +41,7 @@ class Bundle:
 
 class UnitPrice:
     OZ_PER_LB = 16
+    OZ_PER_PINT = 16
     OZ_PER_QUART = 32
     OZ_PER_GAL = 128
     ML_PER_OZ = 29.5735
@@ -167,6 +168,19 @@ class UnitPrice:
         \s*
         Quarts?
         \b
+        """,
+        re.IGNORECASE | re.VERBOSE,
+    )
+
+    # 1 pt
+    # 1/2 pint
+    # 1 pint
+    pat_pint = re.compile(
+        r"""
+        .*?
+        (?P<qty>[\.\d/]+)
+        \s*
+        (?: pint\b | pt\b)
         """,
         re.IGNORECASE | re.VERBOSE,
     )
@@ -351,6 +365,10 @@ class UnitPrice:
             qty = frac(match.group("qty"))
             number = float(match.group("num"))
             result = Bundle(qty * number, "oz")
+
+        elif match := re.match(cls.pat_pint, text):
+            qty = frac(match.group("qty"))
+            result = Bundle(qty * cls.OZ_PER_PINT, "oz")
 
         elif match := re.match(cls.pat_pack, text):
             qty = frac(match.group("qty"))
