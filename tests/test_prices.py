@@ -1,6 +1,7 @@
 import pytest
 
-from unitparsing_pkg.prices import Bundle, CaculateUnitPriceException, ParseQuantityException, UnitPrice
+from unitparsing_pkg.prices import (Bundle, CaculateUnitPriceException,
+                                    ParseQuantityException, UnitPrice)
 
 
 def test_unit_price():
@@ -12,7 +13,7 @@ def test_unit_price():
     # FIXME DO THIS, I STOPPED BECAUSE I STARTED CREATING A MESS WITH UNIT_PARSE FUNCTION
     # =7.99 / (300 / 29.5735)
     # =7.99 / 300
-#    assert (0.7876408833333334, "oz") == UnitPrice.unit_price("$7.99 / 300 ML")
+    #    assert (0.7876408833333334, "oz") == UnitPrice.unit_price("$7.99 / 300 ML")
     assert (0.0499, "each") == UnitPrice.unit_price("4.99/100 pk")
     assert (1.345, "count") == UnitPrice.unit_price("2.69/2 count")
     assert (1.345, "count") == UnitPrice.unit_price("2.69/2 count")
@@ -54,6 +55,7 @@ def test_missing_units_should_raise_exception():
             "Signature Cafe Pacific Coast Style Clam Chowder Soup - 23c "
         )
 
+
 def test_getting_quantity_from_empty_string():
     with pytest.raises(ParseQuantityException):
         UnitPrice.quantity(None)
@@ -74,7 +76,7 @@ def test_quantity():
         "Mission White Corn Tortillas - 30 Count"
     )
     # FIXME
-#    assert Bundle(10.144216950986525, "oz") == UnitPrice.quantity("300 ML")
+    #    assert Bundle(10.144216950986525, "oz") == UnitPrice.quantity("300 ML")
     assert Bundle(100, "pack") == UnitPrice.quantity(" 100 pack ")
     assert Bundle(100, "pack") == UnitPrice.quantity("100pack")
     assert Bundle(100, "pack") == UnitPrice.quantity("100 pk")
@@ -148,5 +150,8 @@ def test_quantity():
     assert Bundle(16, "oz") == UnitPrice.quantity("1  pint ")
     assert Bundle(16, "oz") == UnitPrice.quantity("1 pt")
     assert Bundle(16, "oz") == UnitPrice.quantity("1pint ")
+    assert Bundle(28, "oz") == UnitPrice.quantity("3.5 1/2 pt")
+    assert Bundle(6, "oz") == UnitPrice.quantity("3/4 1/2 pt")
+    assert Bundle(24, "oz") == UnitPrice.quantity("3 1/2 pt")
     assert Bundle(8, "oz") == UnitPrice.quantity("1/2pt")
     assert Bundle(8, "oz") == UnitPrice.quantity("1/2 pt")

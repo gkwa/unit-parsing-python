@@ -176,11 +176,16 @@ class UnitPrice:
     )
 
     # 1 pt
+    # 3/4 1/2 pint
+    # 3 1/2 pint
     # 1/2 pint
     # 1 pint
     pat_pint = re.compile(
         r"""
         .*?
+        \s*
+        ((?P<num>[\.\d/]+)\s+)?
+        \s*
         (?P<qty>[\.\d/]+)
         \s*
         (?: pint\b | pt\b)
@@ -370,8 +375,9 @@ class UnitPrice:
             result = Bundle(qty * number, "oz")
 
         elif match := re.match(cls.pat_pint, text):
+            number = float(frac(match.group("num") or "1"))
             qty = frac(match.group("qty"))
-            result = Bundle(qty * cls.OZ_PER_PINT, "oz")
+            result = Bundle(number * qty * cls.OZ_PER_PINT, "oz")
 
         elif match := re.match(cls.pat_pack, text):
             qty = frac(match.group("qty"))
@@ -402,7 +408,7 @@ class UnitPrice:
             result = Bundle(qty * cls.OZ_PER_GAL, "oz")
 
         elif match := re.match(cls.pat_gallon_2, text):
-            qty = frac(match.group("qty")) or 1
+            qty = frac(match.group("qty") or "1")
             result = Bundle(qty * 0.5 * cls.OZ_PER_GAL, "oz")
 
         elif match := re.match(cls.pat_lb, text):
