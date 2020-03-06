@@ -31,6 +31,9 @@ class Bundle:
         self.amount = amount
         self.unit = unit
 
+    def __repr__(self):
+        return f"Bundle({self.amount!r}, {self.unit!r})"
+
     def __eq__(self, other):
         """Overrides the default implementation"""
         if isinstance(other, Bundle):
