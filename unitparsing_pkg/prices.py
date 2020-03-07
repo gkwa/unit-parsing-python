@@ -169,6 +169,7 @@ class UnitPrice:
         \s*
         (?P<unit>
           pts?\b | pints?\b
+        | mls?\b | milliliters?\b
         | qt\b | quarts?\b
         | gal\b | gallons?\b
         )
@@ -197,18 +198,6 @@ class UnitPrice:
         /?
         \s*
         bunch
-        \b
-        """,
-        re.IGNORECASE | re.VERBOSE,
-    )
-
-    # 750 mL
-    pat_ml = re.compile(
-        r"""
-        .*?
-        (?P<qty>[\.\d]+)
-        \s
-        *mL
         \b
         """,
         re.IGNORECASE | re.VERBOSE,
@@ -298,7 +287,7 @@ class UnitPrice:
         | oz 
         | \bpk\b | \bpack\b
         | \bct\b | \bcount\b
-        | \bml\b
+        | \bmls?\b | \bmilliliters?\b
         | \bea\b | \beach\b
         | \bpint\b | \bpt\b
         )
@@ -310,10 +299,6 @@ class UnitPrice:
     def _convert_oz(cls, qty, unit):
         if unit == "lb":
             qty /= cls.OZ_PER_LB
-            unit = "oz"
-            return qty, unit
-        elif unit == "ml":
-            qty /= cls.ML_PER_OZ
             unit = "oz"
             return qty, unit
         return qty, unit
@@ -363,6 +348,8 @@ class UnitPrice:
             unit = match.group("unit")
             if unit.lower() in ["pt", "pint", "pints"]:
                 result = Bundle(number * qty * cls.OZ_PER_PINT, "oz")
+            elif unit.lower() in ["ml", "mls", "milliliter", "milliliters"]:
+                result = Bundle(number * qty, "ml")
             elif unit.lower() in ["qt", "quart", "quarts"]:
                 result = Bundle(number * qty * cls.OZ_PER_QUART, "oz")
             elif unit.lower() in ["gal", "gallon", "gallons"]:
@@ -404,10 +391,6 @@ class UnitPrice:
 
         elif match := re.match(cls.pat_lb_4, text):
             result = Bundle(1 * cls.OZ_PER_LB, "oz")
-
-        elif match := re.match(cls.pat_ml, text):
-            qty = frac(match.group("qty"))
-            result = Bundle(qty / cls.ML_PER_OZ, "oz")
 
         elif match := re.match(cls.pat_oz_2, text):
             qty = frac(match.group("qty"))

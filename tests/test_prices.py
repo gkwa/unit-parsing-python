@@ -10,10 +10,8 @@ def test_unit_price():
     with pytest.raises(CaculateUnitPriceException):
         UnitPrice.unit_price("/ oz")
 
-    # FIXME DO THIS, I STOPPED BECAUSE I STARTED CREATING A MESS WITH UNIT_PARSE FUNCTION
-    # =7.99 / (300 / 29.5735)
-    # =7.99 / 300
-    #    assert (0.7876408833333334, "oz") == UnitPrice.unit_price("$7.99 / 300 ML")
+    assert (0.026633333333333335, "ml") == UnitPrice.unit_price("$7.99 / 300 ML")
+    assert (0.05876, "ml") == UnitPrice.unit_price("$14.69 / 250 ML")
     assert (0.0499, "each") == UnitPrice.unit_price("4.99/100 pk")
     assert (1.345, "count") == UnitPrice.unit_price("2.69/2 count")
     assert (1.345, "count") == UnitPrice.unit_price("2.69/2 count")
@@ -75,8 +73,6 @@ def test_quantity():
     assert Bundle(30, "count") == UnitPrice.quantity(
         "Mission White Corn Tortillas - 30 Count"
     )
-    # FIXME
-    #    assert Bundle(10.144216950986525, "oz") == UnitPrice.quantity("300 ML")
     assert Bundle(100, "pack") == UnitPrice.quantity(" 100 pack ")
     assert Bundle(100, "pack") == UnitPrice.quantity("100pack")
     assert Bundle(100, "pack") == UnitPrice.quantity("100 pk")
@@ -178,3 +174,6 @@ def test_quantity():
     assert Bundle(192, "oz") == UnitPrice.quantity("3 1/2 gal")
     assert Bundle(64, "oz") == UnitPrice.quantity("1/2gal")
     assert Bundle(64, "oz") == UnitPrice.quantity("1/2 gal")
+
+    assert Bundle(250, "ml") == UnitPrice.quantity("250ML")
+    assert Bundle(250, "ml") == UnitPrice.quantity("250 ml")
