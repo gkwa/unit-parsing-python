@@ -17,6 +17,17 @@ import pathlib
 import pprint
 import re
 
+logger = logging.getLogger(__name__)
+# logger.setLevel(logging.DEBUG)
+# ch = logging.StreamHandler()
+# ch.setLevel(logging.DEBUG)
+# create formatter and add it to the handlers
+# formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+# formatter = logging.Formatter("[%(asctime)s] p%(process)s {%(filename)s:%(lineno)d} %(levelname)s - %(message)s")
+# ch.setFormatter(formatter)
+# add the handlers to the logger
+# logger.addHandler(ch)
+
 
 class ParseQuantityException(Exception):
     """Base class for other exceptions"""
@@ -83,7 +94,7 @@ class UnitPrice:
         \s*
         Fl\.?
         \s*
-        \bOZ\b
+        OZs\b
         """,
         re.IGNORECASE | re.VERBOSE,
     )
@@ -150,8 +161,9 @@ class UnitPrice:
         (?P<unit>
           pts?\b | pints?\b
         | mls?\b | milliliters?\b
-        | qt\b | quarts?\b
-        | gal\b | gallons?\b
+        | qts?\b | quarts?\b
+        | fl\.\s*ozs?\b | fl\s*ozs?\b | ozs?\b | ounces?\b
+        | fl\.\s*gals?\b | fl\s*gals?\b | gals?\b | gallons?\b
         )
         """,
         re.IGNORECASE | re.VERBOSE,
@@ -160,12 +172,12 @@ class UnitPrice:
     # no number, assume 1
     pat_no_number_multi = re.compile(
         r"""
-        [^\d\.]*
+        [\D\.]*
         \s*
         (?P<unit> 
-          LBs?\b | pounds?\b
-          | OZs?\b | ounces?\b
-          | gals?\b | gallons?\b
+          lbs?\b | pounds?\b
+          | fl\.\s*ozs?\b | fl\s*ozs?\b | ozs?\b | ounces?\b
+          | fl\.\s*gals?\b | fl\s*gals?\b | gals?\b | gallons?\b
         )
         """,
         re.IGNORECASE | re.VERBOSE,
@@ -322,17 +334,32 @@ class UnitPrice:
 
     @classmethod
     def doit(cls, number, qty, unit):
-        if unit.lower() in ["pt", "pint", "pints"]:
+        unit = unit.lower().strip()
+
+        s = [y.strip() for y in unit.strip()]
+        s = "".join(s)
+        unit = s
+
+        logger.debug(
+            f"""
+        {number=}
+        {qty=}
+        {unit=}
+        {s=}
+        """
+        )
+
+        if unit in ["pt", "pint", "pints"]:
             result = Bundle(number * qty * cls.OZ_PER_PINT, "oz")
-        elif unit.lower() in ["ml", "mls", "milliliter", "milliliters"]:
+        elif unit in ["ml", "mls", "milliliter", "milliliters"]:
             result = Bundle(number * qty, "ml")
-        elif unit.lower() in ["qt", "quart", "quarts"]:
+        elif unit in ["qt", "quart", "quarts"]:
             result = Bundle(number * qty * cls.OZ_PER_QUART, "oz")
-        elif unit.lower() in ["gal", "gals", "gallon", "gallons"]:
+        elif unit in ["fl.gal", "flgal", "gal", "gals", "gallon", "gallons"]:
             result = Bundle(number * qty * cls.OZ_PER_GAL, "oz")
-        elif unit.lower() in ["lb", "lbs", "pound", "pounds"]:
+        elif unit in ["lb", "lbs", "pound", "pounds"]:
             result = Bundle(number * qty * cls.OZ_PER_LB, "oz")
-        elif unit.lower() in ["oz", "ozs", "ounce", "ounces"]:
+        elif unit in ["fl.oz", "floz", "oz", "ozs", "ounce", "ounces"]:
             result = Bundle(number * qty, "oz")
         else:
             raise ValueError("something went wrong with pat_pint_quart parsing")
@@ -343,7 +370,14 @@ class UnitPrice:
     def quantity(cls, text):
         def frac(str_):
             """ 1/2 to 0.5 """
-            return float(sum(fractions.Fraction(s) for s in str_.split()))
+            logging.debug(f"frac({str_=})")
+            lt = []
+            for xi in str_.split():
+                logging.debug(f"{xi=}")
+                z = fractions.Fraction(xi)
+                lt.append(z)
+
+            return float(sum(lt))
 
         text = "" if text is None else text
 
