@@ -69,10 +69,13 @@ def test_quantity_with_assert_equals():
         UnitPrice.quantity("1.3 cantspell")
 
 
-@pytest.mark.xfail
-def test_quantity_without_number():
+def test_quantity_without_number_oz():
+    assert Bundle(1, "oz") == UnitPrice.quantity("  oZ   ")
     assert Bundle(1, "oz") == UnitPrice.quantity("oZ   ")
+    assert Bundle(16, "oz") == UnitPrice.quantity("LB   ")
     assert Bundle(16, "oz") == UnitPrice.quantity("  LB   ")
+    assert Bundle(128, "oz") == UnitPrice.quantity("gal   ")
+    assert Bundle(128, "oz") == UnitPrice.quantity("  gallons   ")
 
 
 def test_quantity():

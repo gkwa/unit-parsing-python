@@ -63,16 +63,6 @@ class UnitPrice:
         re.IGNORECASE | re.VERBOSE,
     )
 
-    # no number, assume 1
-    pat_lb_4 = re.compile(
-        r"""
-        [^\d\.]+
-        \s*
-        LBs?\b
-        """,
-        re.IGNORECASE | re.VERBOSE,
-    )
-
     # 1/2 oz
     # 32 oz
     pat_oz_2 = re.compile(
@@ -149,16 +139,6 @@ class UnitPrice:
         re.IGNORECASE | re.VERBOSE,
     )
 
-    # 1 qt
-    # 3/4 1/2 quarts
-    # 3 1/2 quart
-    # 1/2 quart
-    # 1 quart
-    # 1 pt
-    # 3/4 1/2 pint
-    # 3 1/2 pint
-    # 1/2 pint
-    # 1 pint
     pat_multi = re.compile(
         r"""
         .*?
@@ -172,6 +152,20 @@ class UnitPrice:
         | mls?\b | milliliters?\b
         | qt\b | quarts?\b
         | gal\b | gallons?\b
+        )
+        """,
+        re.IGNORECASE | re.VERBOSE,
+    )
+
+    # no number, assume 1
+    pat_no_number_multi = re.compile(
+        r"""
+        [^\d\.]*
+        \s*
+        (?P<unit> 
+          LBs?\b | pounds?\b
+          | OZs?\b | ounces?\b
+          | gals?\b | gallons?\b
         )
         """,
         re.IGNORECASE | re.VERBOSE,
@@ -327,6 +321,25 @@ class UnitPrice:
         )
 
     @classmethod
+    def doit(cls, number, qty, unit):
+        if unit.lower() in ["pt", "pint", "pints"]:
+            result = Bundle(number * qty * cls.OZ_PER_PINT, "oz")
+        elif unit.lower() in ["ml", "mls", "milliliter", "milliliters"]:
+            result = Bundle(number * qty, "ml")
+        elif unit.lower() in ["qt", "quart", "quarts"]:
+            result = Bundle(number * qty * cls.OZ_PER_QUART, "oz")
+        elif unit.lower() in ["gal", "gals", "gallon", "gallons"]:
+            result = Bundle(number * qty * cls.OZ_PER_GAL, "oz")
+        elif unit.lower() in ["lb", "lbs", "pound", "pounds"]:
+            result = Bundle(number * qty * cls.OZ_PER_LB, "oz")
+        elif unit.lower() in ["oz", "ozs", "ounce", "ounces"]:
+            result = Bundle(number * qty, "oz")
+        else:
+            raise ValueError("something went wrong with pat_pint_quart parsing")
+
+        return result
+
+    @classmethod
     def quantity(cls, text):
         def frac(str_):
             """ 1/2 to 0.5 """
@@ -349,17 +362,14 @@ class UnitPrice:
         elif match := re.match(cls.pat_multi, text):
             number = float(frac(match.group("num") or "1"))
             qty = frac(match.group("qty") or "1")
-            unit = match.group("unit")
-            if unit.lower() in ["pt", "pint", "pints"]:
-                result = Bundle(number * qty * cls.OZ_PER_PINT, "oz")
-            elif unit.lower() in ["ml", "mls", "milliliter", "milliliters"]:
-                result = Bundle(number * qty, "ml")
-            elif unit.lower() in ["qt", "quart", "quarts"]:
-                result = Bundle(number * qty * cls.OZ_PER_QUART, "oz")
-            elif unit.lower() in ["gal", "gallon", "gallons"]:
-                result = Bundle(number * qty * cls.OZ_PER_GAL, "oz")
-            else:
-                raise ValueError("something went wrong with pat_pint_quart parsing")
+            unit = match.group("unit").strip()
+            return cls.doit(number, qty, unit)
+
+        elif match := re.match(cls.pat_no_number_multi, text):
+            number = 1
+            qty = 1
+            unit = match.group("unit").strip()
+            return cls.doit(number, qty, unit)
 
         elif match := re.match(cls.pat_pack, text):
             qty = frac(match.group("qty"))
@@ -392,9 +402,6 @@ class UnitPrice:
         elif match := re.match(cls.pat_lb, text):
             qty = frac(match.group("qty"))
             result = Bundle(qty * cls.OZ_PER_LB, "oz")
-
-        elif match := re.match(cls.pat_lb_4, text):
-            result = Bundle(1 * cls.OZ_PER_LB, "oz")
 
         elif match := re.match(cls.pat_oz_3, text):
             qty = frac(match.group("qty"))
