@@ -159,7 +159,7 @@ class UnitPrice:
     # 3 1/2 pint
     # 1/2 pint
     # 1 pint
-    pat_pint_quart = re.compile(
+    pat_multi = re.compile(
         r"""
         .*?
         \s*
@@ -346,7 +346,7 @@ class UnitPrice:
             number = float(match.group("num"))
             result = Bundle(qty * number, "oz")
 
-        elif match := re.match(cls.pat_pint_quart, text):
+        elif match := re.match(cls.pat_multi, text):
             number = float(frac(match.group("num") or "1"))
             qty = frac(match.group("qty") or "1")
             unit = match.group("unit")
