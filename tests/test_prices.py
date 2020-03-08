@@ -10,9 +10,11 @@ def test_unit_price():
     with pytest.raises(CaculateUnitPriceException):
         UnitPrice.unit_price("/ oz")
 
+    assert (1.99, "bunch") == UnitPrice.unit_price("1.99/bunch")
+
     assert (0.026633333333333335, "ml") == UnitPrice.unit_price("$7.99 / 300 ML")
     assert (0.05876, "ml") == UnitPrice.unit_price("$14.69 / 250 ML")
-    assert (0.0499, "each") == UnitPrice.unit_price("4.99/100 pk")
+    assert (0.0499, "pack") == UnitPrice.unit_price("4.99/100 pk")
     assert (1.345, "count") == UnitPrice.unit_price("2.69/2 count")
     assert (1.345, "count") == UnitPrice.unit_price("2.69/2 count")
     assert (5.49, "pt") == UnitPrice.unit_price("5.49per pt")
@@ -30,6 +32,9 @@ def test_unit_price():
     assert (5.49, "each") == UnitPrice.unit_price("$5.49 / each")
     assert (5.49, "each") == UnitPrice.unit_price("5.49 /EACH")
     assert (5, "each") == UnitPrice.unit_price("5/EACH")
+    assert (0.124375, "oz") == UnitPrice.unit_price("1.99/lb")
+    assert (0.143125, "oz") == UnitPrice.unit_price("(2.29/lb)")
+    assert (0.143125, "oz") == UnitPrice.unit_price("( 2.29 /lb)")
 
 
 def test_multiple_quantities_in_one_string_will_take_the_first_pair():
@@ -64,9 +69,10 @@ def test_quantity_with_assert_equals():
         UnitPrice.quantity("1.3 cantspell")
 
 
-@pytest.mark.skip(reason="not sure how to handle this one")
-def test_many_strings():
-    str_ = """Kroger® Sweet Golden Whole Kernel Corn - No Salt Added"""
+@pytest.mark.xfail
+def test_quantity_without_number():
+    assert Bundle(1, "oz") == UnitPrice.quantity("oZ   ")
+    assert Bundle(16, "oz") == UnitPrice.quantity("  LB   ")
 
 
 def test_quantity():
@@ -97,6 +103,10 @@ def test_quantity():
     )
     assert Bundle(23, "count") == UnitPrice.quantity(
         "Signature Cafe Pacific Coast Style Clam Chowder Soup - 23 ct"
+    )
+
+    assert Bundle(16.9, "oz") == UnitPrice.quantity(
+        "De Nigris Vinegar Balsamic Bronze Eagle - 16.9 Fl. Oz.",
     )
 
     assert Bundle(12, "each") == UnitPrice.quantity(
@@ -177,3 +187,11 @@ def test_quantity():
 
     assert Bundle(250, "ml") == UnitPrice.quantity("250ML")
     assert Bundle(250, "ml") == UnitPrice.quantity("250 ml")
+
+    assert Bundle(12, "oz") == UnitPrice.quantity(
+        "Lawry's Signature Steakhouse Marinade - 12oz"
+    )
+
+    assert Bundle(40, "oz") == UnitPrice.quantity(
+        "Boneless-Skinless Frozen Chicken Breast Tenderloins - 2.5lbs - Archer Farms™"
+    )

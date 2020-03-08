@@ -68,7 +68,7 @@ class UnitPrice:
         r"""
         [^\d\.]+
         \s*
-        LB\b
+        LBs?\b
         """,
         re.IGNORECASE | re.VERBOSE,
     )
@@ -80,7 +80,7 @@ class UnitPrice:
         .*?
         (?P<qty>[\.\d/]+)
         \s*
-        \bOZ\b
+        OZ\b
         """,
         re.IGNORECASE | re.VERBOSE,
     )
@@ -258,6 +258,7 @@ class UnitPrice:
 
     # 3 lb
     # 3.4 / lb
+    # 1/2 lbs
     # 1/2 lb
     pat_lb = re.compile(
         r"""
@@ -266,7 +267,7 @@ class UnitPrice:
         \s*
         /?
         \s*
-        LB\b
+        LBs?\b
         """,
         re.IGNORECASE | re.VERBOSE,
     )
@@ -285,6 +286,7 @@ class UnitPrice:
         (?P<unit>
         lb 
         | oz 
+        | \bbunch\b
         | \bpk\b | \bpack\b
         | \bct\b | \bcount\b
         | \bmls?\b | \bmilliliters?\b
@@ -314,8 +316,10 @@ class UnitPrice:
             unit = match.group("unit")
             if unit:
                 unit = unit.lower().strip()
-                if unit == "pk" or unit == "pack":
-                    unit = "each"
+                if unit in ["pk", "pack"]:
+                    unit = "pack"
+                elif unit in ["bunch"]:
+                    unit = "bunch"
             qty, unit = cls._convert_oz(dollars / qty, unit)
             return qty, unit
         raise CaculateUnitPriceException(
@@ -344,7 +348,7 @@ class UnitPrice:
 
         elif match := re.match(cls.pat_pint_quart, text):
             number = float(frac(match.group("num") or "1"))
-            qty = frac(match.group("qty"))
+            qty = frac(match.group("qty") or "1")
             unit = match.group("unit")
             if unit.lower() in ["pt", "pint", "pints"]:
                 result = Bundle(number * qty * cls.OZ_PER_PINT, "oz")
@@ -392,11 +396,11 @@ class UnitPrice:
         elif match := re.match(cls.pat_lb_4, text):
             result = Bundle(1 * cls.OZ_PER_LB, "oz")
 
-        elif match := re.match(cls.pat_oz_2, text):
+        elif match := re.match(cls.pat_oz_3, text):
             qty = frac(match.group("qty"))
             result = Bundle(qty, "oz")
 
-        elif match := re.match(cls.pat_oz_3, text):
+        elif match := re.match(cls.pat_oz_2, text):
             qty = frac(match.group("qty"))
             result = Bundle(qty, "oz")
 
