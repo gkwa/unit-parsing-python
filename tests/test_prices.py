@@ -190,13 +190,15 @@ def test_quantity():
 
     assert Bundle(250, "ml") == UnitPrice.quantity("250ML")
     assert Bundle(250, "ml") == UnitPrice.quantity("250 ml")
-
     assert Bundle(12, "oz") == UnitPrice.quantity(
         "Lawry's Signature Steakhouse Marinade - 12oz"
     )
 
     assert Bundle(40, "oz") == UnitPrice.quantity(
         "Boneless-Skinless Frozen Chicken Breast Tenderloins - 2.5lbs - Archer Farms™"
+    )
+    assert Bundle(15.2, "oz") == UnitPrice.quantity(
+        "Suja Organic Vegan Peach Ginger Kombucha - 15.2oz"
     )
 
 

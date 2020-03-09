@@ -404,10 +404,6 @@ class UnitPrice:
             qty = frac(match.group("qty"))
             result = Bundle(qty, "each")
 
-        elif match := re.match(cls.pat_each_2, text):
-            cls.logger.debug("pat_each_2")
-            result = Bundle(1, "each")
-
         elif match := re.match(cls.pat_gallon_2, text):
             cls.logger.debug("pat_gallon_2")
             qty = frac(match.group("qty") or "1")
@@ -433,6 +429,10 @@ class UnitPrice:
             qty = frac(match.group("qty"))
             number = float(match.group("num"))
             result = Bundle(qty * number, "oz")
+
+        elif match := re.match(cls.pat_each_2, text):
+            cls.logger.debug("pat_each_2")
+            result = Bundle(1, "each")
 
         else:
             raise ParseQuantityException(f"can't match quantity on string '{text}'")
