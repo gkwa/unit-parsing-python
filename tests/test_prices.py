@@ -9,9 +9,9 @@ def test_unit_price():
         UnitPrice.unit_price(" / oz")
     with pytest.raises(CaculateUnitPriceException):
         UnitPrice.unit_price("/ oz")
-
+    with pytest.raises(CaculateUnitPriceException):
+        UnitPrice.unit_price("5.49 / ")
     assert (1.99, "bunch") == UnitPrice.unit_price("1.99/bunch")
-
     assert (0.026633333333333335, "ml") == UnitPrice.unit_price("$7.99 / 300 ML")
     assert (0.05876, "ml") == UnitPrice.unit_price("$14.69 / 250 ML")
     assert (0.0499, "pack") == UnitPrice.unit_price("4.99/100 pk")
@@ -23,8 +23,6 @@ def test_unit_price():
     assert (5.49, "oz") == UnitPrice.unit_price("5.49 - oz")
     assert (5.49, "pt") == UnitPrice.unit_price("5.49 / pt")
     assert (5.49, "pint") == UnitPrice.unit_price("5.49 / pint")
-    with pytest.raises(CaculateUnitPriceException):
-        UnitPrice.unit_price("5.49 / ")
     assert (5.49, "oz") == UnitPrice.unit_price("5.49 / oz")
     assert (0.343125, "oz") == UnitPrice.unit_price("5.49/lb")
     assert (5.49, "each") == UnitPrice.unit_price("5.49 each")
@@ -35,6 +33,7 @@ def test_unit_price():
     assert (0.124375, "oz") == UnitPrice.unit_price("1.99/lb")
     assert (0.143125, "oz") == UnitPrice.unit_price("(2.29/lb)")
     assert (0.143125, "oz") == UnitPrice.unit_price("( 2.29 /lb)")
+    assert (0.2603125, "oz") == UnitPrice.unit_price("24.99/96 oz")
 
 
 def test_multiple_quantities_in_one_string_will_take_the_first_pair():
@@ -199,6 +198,12 @@ def test_quantity():
     )
     assert Bundle(15.2, "oz") == UnitPrice.quantity(
         "Suja Organic Vegan Peach Ginger Kombucha - 15.2oz"
+    )
+    assert Bundle(10368, "oz") == UnitPrice.quantity(
+        "Land O' Lakes Mini Moo's Half & Half - Single Serve Pods - 192ct/54 fl oz"
+    )
+    assert Bundle(96, "oz") == UnitPrice.quantity(
+        "B-Tea Raw & Organic Green Tea - 6pk/16 fl oz Bottles"
     )
 
 

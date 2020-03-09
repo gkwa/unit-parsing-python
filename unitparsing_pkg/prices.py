@@ -180,8 +180,7 @@ class UnitPrice:
         .*?
         [^\d\.]?
         \s*
-        Each
-        \b
+        \bEach\b
         """,
         re.IGNORECASE | re.VERBOSE,
     )
@@ -202,12 +201,13 @@ class UnitPrice:
 
     # 4 ct / 15.25 oz
     # 15 cans / 12 fl oz
+    # 6pk/16 fl oz Bottles
     pat_can = re.compile(
         r"""
         .*?
         (?P<num>[\.\d/]+)
         \s*
-        (?:ct|count|cans?|jars?)
+        (?:ct|count|cans?|jars?|pks?|pack)
         \s*
         /
         \s*
@@ -215,8 +215,7 @@ class UnitPrice:
         \s*
         (FL\.?)?
         \s*
-        OZ
-        \b
+        OZ\b
         """,
         re.IGNORECASE | re.VERBOSE,
     )
@@ -318,7 +317,7 @@ class UnitPrice:
                 elif unit in ["bunch"]:
                     unit = "bunch"
             qty, unit = cls._convert_oz(dollars / qty, unit)
-            return qty, unit
+            return (qty, unit)
         raise CaculateUnitPriceException(
             f"can't generate unit price from text '{orig}'"
         )
@@ -378,11 +377,6 @@ class UnitPrice:
             unit = match.group("unit").strip()
             return cls.doit(number, qty, unit)
 
-        elif match := re.match(cls.pat_pack, text):
-            cls.logger.debug("pat_pack")
-            qty = frac(match.group("qty"))
-            result = Bundle(qty, "pack")
-
         elif match := re.match(cls.pat_bunch, text):
             cls.logger.debug("pat_bunch")
             qty = frac(match.group("qty"))
@@ -433,6 +427,11 @@ class UnitPrice:
         elif match := re.match(cls.pat_each_2, text):
             cls.logger.debug("pat_each_2")
             result = Bundle(1, "each")
+
+        elif match := re.match(cls.pat_pack, text):
+            cls.logger.debug("pat_pack")
+            qty = frac(match.group("qty"))
+            result = Bundle(qty, "pack")
 
         else:
             raise ParseQuantityException(f"can't match quantity on string '{text}'")
