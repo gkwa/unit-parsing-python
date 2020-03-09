@@ -37,7 +37,6 @@ def test_unit_price():
     assert (0.143125, "oz") == UnitPrice.unit_price("( 2.29 /lb)")
 
 
-@pytest.mark.xfail
 def test_multiple_quantities_in_one_string_will_take_the_first_pair():
     assert Bundle(61, "oz") == UnitPrice.quantity("4 ct / 15.25 oz 5 ct / 15.25 oz")
 
@@ -77,26 +76,6 @@ def test_quantity_without_number_oz():
     assert Bundle(16, "oz") == UnitPrice.quantity("  LB   ")
     assert Bundle(128, "oz") == UnitPrice.quantity("gal   ")
     assert Bundle(128, "oz") == UnitPrice.quantity("  gallons   ")
-
-    assert Bundle(1, "oz") == UnitPrice.quantity("fl.oz")
-    assert Bundle(1, "oz") == UnitPrice.quantity("floz")
-    assert Bundle(1, "oz") == UnitPrice.quantity("fl oz")
-    assert Bundle(1, "oz") == UnitPrice.quantity("fl  oz")
-    assert Bundle(1, "oz") == UnitPrice.quantity("fl  oz   ")
-    assert Bundle(1, "oz") == UnitPrice.quantity("  fl  oz   ")
-    assert Bundle(1, "oz") == UnitPrice.quantity("  fl    oz   ")
-    assert Bundle(1, "oz") == UnitPrice.quantity("  fl.  oz   ")
-    assert Bundle(1, "oz") == UnitPrice.quantity("  fl.    oz   ")
-
-    assert Bundle(128, "oz") == UnitPrice.quantity("fl.gal")
-    assert Bundle(128, "oz") == UnitPrice.quantity("flgal")
-    assert Bundle(128, "oz") == UnitPrice.quantity("fl gal")
-    assert Bundle(128, "oz") == UnitPrice.quantity("fl  gal")
-    assert Bundle(128, "oz") == UnitPrice.quantity("fl  gal   ")
-    assert Bundle(128, "oz") == UnitPrice.quantity("  fl  gal   ")
-    assert Bundle(128, "oz") == UnitPrice.quantity("  fl    gal   ")
-    assert Bundle(128, "oz") == UnitPrice.quantity("  fl.  gal   ")
-    assert Bundle(128, "oz") == UnitPrice.quantity("  fl.    gal   ")
 
 
 def test_quantity():
