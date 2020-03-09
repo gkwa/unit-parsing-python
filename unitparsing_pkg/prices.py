@@ -325,6 +325,7 @@ class UnitPrice:
 
     @classmethod
     def doit(cls, number, qty, unit):
+        unit = unit.lower().strip()
         if unit in ["pt", "pint", "pints"]:
             result = Bundle(number * qty * cls.OZ_PER_PINT, "oz")
         elif unit in ["ml", "mls", "milliliter", "milliliters"]:
@@ -358,77 +359,77 @@ class UnitPrice:
 
         result = None
         if match := re.match(cls.pat_oz_4, text):
-            cls.logger.debug('pat_oz_4')
+            cls.logger.debug("pat_oz_4")
             qty = frac(match.group("qty"))
             number = float(match.group("num"))
             result = Bundle(qty * number, "oz")
 
         elif match := re.match(cls.pat_multi, text):
-            cls.logger.debug('pat_multi')
+            cls.logger.debug("pat_multi")
             number = float(frac(match.group("num") or "1"))
             qty = frac(match.group("qty") or "1")
             unit = match.group("unit").strip()
             return cls.doit(number, qty, unit)
 
         elif match := re.match(cls.pat_no_number_multi, text):
-            cls.logger.debug('pat_no_number_multi')
+            cls.logger.debug("pat_no_number_multi")
             number = 1
             qty = 1
             unit = match.group("unit").strip()
             return cls.doit(number, qty, unit)
 
         elif match := re.match(cls.pat_pack, text):
-            cls.logger.debug('pat_pack')
+            cls.logger.debug("pat_pack")
             qty = frac(match.group("qty"))
             result = Bundle(qty, "pack")
 
         elif match := re.match(cls.pat_bunch, text):
-            cls.logger.debug('pat_bunch')
+            cls.logger.debug("pat_bunch")
             qty = frac(match.group("qty"))
             result = Bundle(qty, "bunch")
 
         elif match := re.match(cls.pat_can, text):
-            cls.logger.debug('pat_can')
+            cls.logger.debug("pat_can")
             qty = frac(match.group("qty"))
             number = frac(match.group("num"))
             result = Bundle(qty * number, "oz")
 
         elif match := re.match(cls.pat_count, text):
-            cls.logger.debug('pat_count')
+            cls.logger.debug("pat_count")
             qty = frac(match.group("qty"))
             result = Bundle(qty, "count")
 
         elif match := re.match(cls.pat_each, text):
-            cls.logger.debug('pat_each')
+            cls.logger.debug("pat_each")
             qty = frac(match.group("qty"))
             result = Bundle(qty, "each")
 
         elif match := re.match(cls.pat_each_2, text):
-            cls.logger.debug('pat_each_2')
+            cls.logger.debug("pat_each_2")
             result = Bundle(1, "each")
 
         elif match := re.match(cls.pat_gallon_2, text):
-            cls.logger.debug('pat_gallon_2')
+            cls.logger.debug("pat_gallon_2")
             qty = frac(match.group("qty") or "1")
             result = Bundle(qty * 0.5 * cls.OZ_PER_GAL, "oz")
 
         elif match := re.match(cls.pat_lb, text):
-            cls.logger.debug('pat_lb')
+            cls.logger.debug("pat_lb")
             qty = frac(match.group("qty"))
             result = Bundle(qty * cls.OZ_PER_LB, "oz")
 
         elif match := re.match(cls.pat_oz_3, text):
-            cls.logger.debug('pat_oz_3')
+            cls.logger.debug("pat_oz_3")
             qty = frac(match.group("qty"))
             result = Bundle(qty, "oz")
 
         elif match := re.match(cls.pat_oz_2, text):
-            cls.logger.debug('pat_oz_2')
+            cls.logger.debug("pat_oz_2")
             qty = frac(match.group("qty"))
             result = Bundle(qty, "oz")
 
         elif match := re.match(cls.pat_oz_5, text):
-            cls.logger.debug('pat_oz_5')
+            cls.logger.debug("pat_oz_5")
             qty = frac(match.group("qty"))
             number = float(match.group("num"))
             result = Bundle(qty * number, "oz")

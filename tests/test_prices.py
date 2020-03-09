@@ -198,3 +198,36 @@ def test_quantity():
     assert Bundle(40, "oz") == UnitPrice.quantity(
         "Boneless-Skinless Frozen Chicken Breast Tenderloins - 2.5lbs - Archer Farms™"
     )
+
+
+@pytest.mark.xfail
+def test_quantity_without_number_more():
+    assert Bundle(128, "oz") == UnitPrice.quantity("fl.gal")
+    assert Bundle(128, "oz") == UnitPrice.quantity("  fl.  gal   ")
+    assert Bundle(128, "oz") == UnitPrice.quantity("  fl.    gal   ")
+    assert Bundle(1, "oz") == UnitPrice.quantity("fl.oz")
+    assert Bundle(1, "oz") == UnitPrice.quantity("  fl.  oz   ")
+    assert Bundle(1, "oz") == UnitPrice.quantity("  fl.    oz   ")
+
+
+def test_quantity_without_number_oz():
+    assert Bundle(1, "oz") == UnitPrice.quantity("  oZ   ")
+    assert Bundle(1, "oz") == UnitPrice.quantity("oZ   ")
+    assert Bundle(16, "oz") == UnitPrice.quantity("LB   ")
+    assert Bundle(16, "oz") == UnitPrice.quantity("  LB   ")
+    assert Bundle(128, "oz") == UnitPrice.quantity("gal   ")
+    assert Bundle(128, "oz") == UnitPrice.quantity("  gallons   ")
+
+    assert Bundle(1, "oz") == UnitPrice.quantity("floz")
+    assert Bundle(1, "oz") == UnitPrice.quantity("fl oz")
+    assert Bundle(1, "oz") == UnitPrice.quantity("fl  oz")
+    assert Bundle(1, "oz") == UnitPrice.quantity("fl  oz   ")
+    assert Bundle(1, "oz") == UnitPrice.quantity("  fl  oz   ")
+    assert Bundle(1, "oz") == UnitPrice.quantity("  fl    oz   ")
+
+    assert Bundle(128, "oz") == UnitPrice.quantity("flgal")
+    assert Bundle(128, "oz") == UnitPrice.quantity("fl gal")
+    assert Bundle(128, "oz") == UnitPrice.quantity("fl  gal")
+    assert Bundle(128, "oz") == UnitPrice.quantity("fl  gal   ")
+    assert Bundle(128, "oz") == UnitPrice.quantity("  fl  gal   ")
+    assert Bundle(128, "oz") == UnitPrice.quantity("  fl    gal   ")
