@@ -86,7 +86,7 @@ class UnitPrice:
         \s*
         Fl\.?
         \s*
-        \bOZ\b
+        OZs\b
         """,
         re.IGNORECASE | re.VERBOSE,
     )
@@ -146,15 +146,24 @@ class UnitPrice:
         r"""
         .*?
         \s*
-        ((?P<num>[\.\d/]+)\s+)?
+        (
+        (?P<num>
+         \d{1,}\.\d{1,}
+         | \d{1,}/\d{1,}
+         | \d+
+        )\s*(cts?|counts?)?\b)
         \s*
-        (?P<qty>[\.\d/]+)
+        (?P<qty>(
+            \d{1,}\.\d{1,}
+          | \d{1,}/\d{1,}
+        ))
         \s*
         (?P<unit>
           pts?\b | pints?\b
         | mls?\b | milliliters?\b
-        | qt\b | quarts?\b
-        | gal\b | gallons?\b
+        | qts?\b | quarts?\b
+        | fl\.\s*ozs?\b | fl\s*ozs?\b | ozs?\b | ounces?\b
+        | fl\.\s*gals?\b | fl\s*gals?\b | gals?\b | gallons?\b
         )
         """,
         re.IGNORECASE | re.VERBOSE,
@@ -163,12 +172,12 @@ class UnitPrice:
     # no number, assume 1
     pat_no_number_multi = re.compile(
         r"""
-        [^\d\.]*
+        [\D\.]*
         \s*
         (?P<unit> 
-          LBs?\b | pounds?\b
-          | OZs?\b | ounces?\b
-          | gals?\b | gallons?\b
+          lbs?\b | pounds?\b
+          | fl\.\s*ozs?\b | fl\s*ozs?\b | ozs?\b | ounces?\b
+          | fl\.\s*gals?\b | fl\s*gals?\b | gals?\b | gallons?\b
         )
         """,
         re.IGNORECASE | re.VERBOSE,
@@ -325,6 +334,21 @@ class UnitPrice:
 
     @classmethod
     def doit(cls, number, qty, unit):
+        unit = unit.lower().strip()
+
+        s = [y.strip() for y in unit.strip()]
+        s = "".join(s)
+        unit = s
+
+        cls.logger.debug(
+            f"""
+        {number=}
+        {qty=}
+        {unit=}
+        {s=}
+        """
+        )
+
         if unit in ["pt", "pint", "pints"]:
             result = Bundle(number * qty * cls.OZ_PER_PINT, "oz")
         elif unit in ["ml", "mls", "milliliter", "milliliters"]:
@@ -346,7 +370,14 @@ class UnitPrice:
     def quantity(cls, text):
         def frac(str_):
             """ 1/2 to 0.5 """
-            return float(sum(fractions.Fraction(s) for s in str_.split()))
+            cls.logger.debug(f"frac({str_=})")
+            lt = []
+            for xi in str_.split():
+                cls.logger.debug(f"{xi=}")
+                z = fractions.Fraction(xi)
+                lt.append(z)
+
+            return float(sum(lt))
 
         text = "" if text is None else text
 
