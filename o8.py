@@ -6,8 +6,8 @@ import sys
 from unitparsing_pkg.prices import (Bundle, CaculateUnitPriceException,
                                     ParseQuantityException, UnitPrice)
 
-root = logging.getLogger()
-root.setLevel(logging.DEBUG)
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
 
 handler = logging.StreamHandler(sys.stdout)
 handler.setLevel(logging.DEBUG)
@@ -16,8 +16,6 @@ formatter = logging.Formatter(
 )
 handler.setFormatter(formatter)
 
-root.addHandler(handler)
+logger.addHandler(handler)
 
-root.debug("debug")
 x = UnitPrice.unit_price("5.49/pt")
-root.debug(x)
