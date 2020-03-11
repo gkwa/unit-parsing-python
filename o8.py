@@ -1,10 +1,7 @@
 import logging
-import logging.config
-import logging.handlers
 import sys
 
-from unitparsing_pkg.prices import (Bundle, CaculateUnitPriceException,
-                                    ParseQuantityException, UnitPrice)
+from unitparsing_pkg.prices import Bundle, UnitPrice
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
@@ -18,5 +15,9 @@ handler.setFormatter(formatter)
 
 logger.addHandler(handler)
 
-UnitPrice.quantity("250ML")
+b = Bundle(61, "oz")
 
+v = UnitPrice.quantity("250ML")
+logger.debug(v)
+
+v = UnitPrice.unit_price("2.19/qt")

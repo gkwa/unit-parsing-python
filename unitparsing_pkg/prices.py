@@ -32,12 +32,12 @@ class Bundle:
         self.logger = logging.getLogger(__name__)
         self.amount = amount
         self.unit = unit
+        self.logger.debug(f"{self.amount=}")
 
     def __repr__(self):
         return f"Bundle({self.amount!r}, {self.unit!r})"
 
     def __eq__(self, other):
-        """Overrides the default implementation"""
         if isinstance(other, Bundle):
             return (self.amount == other.amount) and (self.unit == other.unit)
 
@@ -154,7 +154,7 @@ class UnitPrice:
         (?P<unit>
           pts?\b | pints?\b
         | mls?\b | milliliters?\b
-        | qt\b | quarts?\b
+        | qts?\b | quarts?\b
         | gal\b | gallons?\b
         )
         """,
@@ -285,6 +285,7 @@ class UnitPrice:
         | oz 
         | \bbunch\b
         | \bpk\b | \bpack\b
+        | \bqts?\b | \bquarts?\b
         | \bct\b | \bcount\b
         | \bmls?\b | \bmilliliters?\b
         | \bea\b | \beach\b
@@ -308,6 +309,10 @@ class UnitPrice:
             qty *= cls.ML_PER_OZ
             unit = "oz"
             return qty, unit
+        elif unit in ["qt", "quart", "quarts"]:
+            qty /= cls.OZ_PER_QUART
+            unit = "oz"
+            return qty, unit
         return qty, unit
 
     @classmethod
@@ -316,8 +321,7 @@ class UnitPrice:
         orig = text
         text = str(text)  # text might not be string, could be float, int
         text = text.lower()
-        cls.logger.debug(f"matching on {text}'")
-        
+
         if match := re.match(cls.pat_unit_price, text):
             cls.logger.debug('matched pat_unit_price')
             dollars = float(match.group("dollars"))
@@ -329,6 +333,7 @@ class UnitPrice:
                     unit = "pack"
                 elif unit in ["bunch"]:
                     unit = "bunch"
+            cls.logger.debug(f"{dollars=},{qty=},{unit=}")
             qty, unit = cls._convert_oz(dollars / qty, unit)
             return (qty, unit)
         raise CaculateUnitPriceException(f"can't generate unit price from text '{orig}'")
@@ -340,7 +345,7 @@ class UnitPrice:
             result = Bundle(number * qty * cls.OZ_PER_PINT, "oz")
         elif unit in ["ml", "mls", "milliliter", "milliliters"]:
             result = Bundle(number * qty / cls.ML_PER_OZ, "oz")
-        elif unit in ["qt", "quart", "quarts"]:
+        elif unit in ["qt", "qts", "quart", "quarts"]:
             result = Bundle(number * qty * cls.OZ_PER_QUART, "oz")
         elif unit in ["fl.gal", "flgal", "gal", "gals", "gallon", "gallons"]:
             result = Bundle(number * qty * cls.OZ_PER_GAL, "oz")
