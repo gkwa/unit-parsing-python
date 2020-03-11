@@ -18,4 +18,5 @@ handler.setFormatter(formatter)
 
 logger.addHandler(handler)
 
-x = UnitPrice.unit_price("5.49/pt")
+UnitPrice.quantity("250ML")
+

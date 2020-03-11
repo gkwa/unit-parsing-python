@@ -92,8 +92,8 @@ test_quantity_parameter_list = [
     ("3 1/2 gal", (3 * 1 / 2 * 128, "oz")),
     ("1/2gal", (1 / 2 * 128, "oz")),
     ("1/2 gal", (1 / 2 * 128, "oz")),
-    ("250ML", (250, "ml")),
-    ("250 ml", (250, "ml")),
+    ("250ML", (250 * 1 / 29.5735, "oz")),
+    ("250 ml", (250 * 1 / 29.5735, "oz")),
     ("Lawry's Signature Steakhouse Marinade - 12oz", (12, "oz")),
     ("Frozen Chicken Breast Tenderloins - 2.5lbs - Archer Farms™", (2.5 * 16, "oz")),
     ("Vegan Peach Ginger Kombucha - 15.2oz", (15.2, "oz")),
@@ -125,14 +125,14 @@ def test_quantity(test_input, expected):
 
 test_unit_price_parameter_list = [
     ("1.99/bunch", (1.99, "bunch")),
-    ("$7.99 / 300 ML", (7.99 / (300 / 29.5735), "oz")),
-    ("$14.69 / 250 ML", (14.69 / (250 / 29.5735), "oz")),
+    ("$7.99 / 300 ML", (7.99 / (300 * 1 / 29.5735), "oz")),
+    ("$14.69 / 250 ML", (14.69 / (250 * 1 / 29.5735), "oz")),
     ("4.99/100 pk", (4.99 / 100, "pack")),
     ("2.69/2 count", (2.69 / 2, "count")),
     ("2.69/2 count", (2.69 / 2, "count")),
-    ("5.49per pt", (5.49/16, "oz")),
-    ("5.49 per pt", (5.49/16, "oz")),
-    ("5.49 // pt", (5.49/16, "oz")),
+    ("5.49per pt", (5.49 / 16, "oz")),
+    ("5.49 per pt", (5.49 / 16, "oz")),
+    ("5.49 // pt", (5.49 / 16, "oz")),
     ("5.49 - oz", (5.49, "oz")),
     ("5.49 / pt", (5.49 / 16, "oz")),
     ("5.49 / pint", (5.49 / 16, "oz")),
@@ -147,9 +147,6 @@ test_unit_price_parameter_list = [
     ("(2.29/lb)", (2.29 / 16, "oz")),
     ("( 2.29 /lb)", (2.29 / 16, "oz")),
     ("24.99/96 oz", (24.99 / 96, "oz")),
-    ("  oZ   ", (1, "oz")),
-    ("LB   ", (16, "oz")),
-    ("gal   ", (128, "oz")),
 ]
 
 
@@ -158,13 +155,21 @@ def test_unit_price_with_parameter_list(test_input, expected):
     assert UnitPrice.unit_price(test_input) == expected
 
 
-def test_unit_price():
+unit_price_will_fail_list = [
+    (" / oz"),
+    ("/ oz"),
+    ("5.49 / "),
+    (" oZ "),
+    ("LB"),
+    (" LB "),
+    (" Gal "),
+]
+
+
+@pytest.mark.parametrize("test_input", unit_price_will_fail_list)
+def test_unit_price(test_input):
     with pytest.raises(CaculateUnitPriceException):
-        UnitPrice.unit_price(" / oz")
-    with pytest.raises(CaculateUnitPriceException):
-        UnitPrice.unit_price("/ oz")
-    with pytest.raises(CaculateUnitPriceException):
-        UnitPrice.unit_price("5.49 / ")
+        UnitPrice.unit_price(test_input)
 
 
 def test_multiple_quantities_in_one_string_will_take_the_first_pair():

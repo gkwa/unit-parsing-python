@@ -304,6 +304,10 @@ class UnitPrice:
             qty /= cls.OZ_PER_PINT
             unit = "oz"
             return qty, unit
+        elif unit in ["ml", "milliliter"]:
+            qty *= cls.ML_PER_OZ
+            unit = "oz"
+            return qty, unit
         return qty, unit
 
     @classmethod
@@ -313,6 +317,7 @@ class UnitPrice:
         text = str(text)  # text might not be string, could be float, int
         text = text.lower()
         cls.logger.debug(f"matching on {text}'")
+        
         if match := re.match(cls.pat_unit_price, text):
             cls.logger.debug('matched pat_unit_price')
             dollars = float(match.group("dollars"))
@@ -326,9 +331,7 @@ class UnitPrice:
                     unit = "bunch"
             qty, unit = cls._convert_oz(dollars / qty, unit)
             return (qty, unit)
-        raise CaculateUnitPriceException(
-            f"can't generate unit price from text '{orig}'"
-        )
+        raise CaculateUnitPriceException(f"can't generate unit price from text '{orig}'")
 
     @classmethod
     def doit(cls, number, qty, unit):
@@ -336,7 +339,7 @@ class UnitPrice:
         if unit in ["pt", "pint", "pints"]:
             result = Bundle(number * qty * cls.OZ_PER_PINT, "oz")
         elif unit in ["ml", "mls", "milliliter", "milliliters"]:
-            result = Bundle(number * qty, "ml")
+            result = Bundle(number * qty / cls.ML_PER_OZ, "oz")
         elif unit in ["qt", "quart", "quarts"]:
             result = Bundle(number * qty * cls.OZ_PER_QUART, "oz")
         elif unit in ["fl.gal", "flgal", "gal", "gals", "gallon", "gallons"]:
