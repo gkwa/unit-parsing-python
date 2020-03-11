@@ -18,9 +18,6 @@ handler.setFormatter(formatter)
 
 root.addHandler(handler)
 
-for key in logging.Logger.manager.loggerDict:
-    print(key)
-
 root.debug("debug")
 x = UnitPrice.unit_price("5.49/pt")
 root.debug(x)
