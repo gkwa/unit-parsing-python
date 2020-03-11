@@ -125,28 +125,28 @@ def test_quantity(test_input, expected):
 
 test_unit_price_parameter_list = [
     ("1.99/bunch", (1.99, "bunch")),
-    ("$7.99 / 300 ML", (0.026633333333333335, "ml")),
-    ("$14.69 / 250 ML", (0.05876, "ml")),
-    ("4.99/100 pk", (0.0499, "pack")),
-    ("2.69/2 count", (1.345, "count")),
-    ("2.69/2 count", (1.345, "count")),
-    ("5.49per pt", (5.49, "pt")),
-    ("5.49 per pt", (5.49, "pt")),
-    ("5.49 // pt", (5.49, "pt")),
+    ("$7.99 / 300 ML", (7.99 / (300 / 29.5735), "oz")),
+    ("$14.69 / 250 ML", (14.69 / (250 / 29.5735), "oz")),
+    ("4.99/100 pk", (4.99 / 100, "pack")),
+    ("2.69/2 count", (2.69 / 2, "count")),
+    ("2.69/2 count", (2.69 / 2, "count")),
+    ("5.49per pt", (5.49/16, "oz")),
+    ("5.49 per pt", (5.49/16, "oz")),
+    ("5.49 // pt", (5.49/16, "oz")),
     ("5.49 - oz", (5.49, "oz")),
-    ("5.49 / pt", (5.49, "pt")),
-    ("5.49 / pint", (5.49, "pint")),
+    ("5.49 / pt", (5.49 / 16, "oz")),
+    ("5.49 / pint", (5.49 / 16, "oz")),
     ("5.49 / oz", (5.49, "oz")),
-    ("5.49/lb", (0.343125, "oz")),
+    ("5.49/lb", (5.49 / 16, "oz")),
     ("5.49 each", (5.49, "each")),
     ("5.49 / each", (5.49, "each")),
     ("$5.49 / each", (5.49, "each")),
     ("5.49 /EACH", (5.49, "each")),
     ("5/EACH", (5, "each")),
-    ("1.99/lb", (0.124375, "oz")),
-    ("(2.29/lb)", (0.143125, "oz")),
-    ("( 2.29 /lb)", (0.143125, "oz")),
-    ("24.99/96 oz", (0.2603125, "oz")),
+    ("1.99/lb", (1.99 / 16, "oz")),
+    ("(2.29/lb)", (2.29 / 16, "oz")),
+    ("( 2.29 /lb)", (2.29 / 16, "oz")),
+    ("24.99/96 oz", (24.99 / 96, "oz")),
     ("  oZ   ", (1, "oz")),
     ("LB   ", (16, "oz")),
     ("gal   ", (128, "oz")),
@@ -154,7 +154,7 @@ test_unit_price_parameter_list = [
 
 
 @pytest.mark.parametrize("test_input,expected", test_unit_price_parameter_list)
-def test_unit_price(test_input, expected):
+def test_unit_price_with_parameter_list(test_input, expected):
     assert UnitPrice.unit_price(test_input) == expected
 
 
