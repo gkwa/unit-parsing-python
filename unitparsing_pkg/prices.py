@@ -18,6 +18,7 @@ import pprint
 import re
 
 
+
 class ParseQuantityException(Exception):
     """Base class for other exceptions"""
 
@@ -299,14 +300,21 @@ class UnitPrice:
             qty /= cls.OZ_PER_LB
             unit = "oz"
             return qty, unit
+        elif unit in ["pt", "pint", "pints"]:
+            qty /= cls.OZ_PER_PINT
+            unit = "oz"
+            return qty, unit
         return qty, unit
 
     @classmethod
     def unit_price(cls, text):
+        cls.logger.debug(f"matching on {text}'")
         orig = text
         text = str(text)  # text might not be string, could be float, int
         text = text.lower()
+        cls.logger.debug(f"matching on {text}'")
         if match := re.match(cls.pat_unit_price, text):
+            cls.logger.debug('matched pat_unit_price')
             dollars = float(match.group("dollars"))
             qty = float(match.group("qty") or 1)
             unit = match.group("unit")
