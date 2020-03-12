@@ -20,10 +20,4 @@ b = Bundle(61, "oz")
 v = UnitPrice.quantity("250ML")
 logger.debug(v)
 
-v = UnitPrice.unit_price(f"5.49/lb")
-v = UnitPrice.unit_price(f"0.49/pound")
-
-b = UnitPrice.quantity(" pound ")
-y = 0.49/b.amount
-v = UnitPrice.unit_price(f"{y}/{b.unit}")
-
+v = UnitPrice.unit_price("2.19/qt")
