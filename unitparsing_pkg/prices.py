@@ -74,7 +74,9 @@ class UnitPrice:
         .*?
         (?P<qty>[\.\d/]+)
         \s*
-        OZ\b
+        (?:
+        OZs?\b | ounces?\b
+        )
         """,
         re.IGNORECASE | re.VERBOSE,
     )
@@ -264,7 +266,9 @@ class UnitPrice:
         \s*
         /?
         \s*
-        LBs?\b
+        (?:
+        LBs?\b | pounds?\b
+        )
         """,
         re.IGNORECASE | re.VERBOSE,
     )
@@ -283,7 +287,7 @@ class UnitPrice:
         (?P<qty>[\.\d]+)?
         \s*
         (?P<unit>
-        lb 
+        lb\b | pound\b
         | oz 
         | \bbunch\b
         | \bpk\b | \bpack\b

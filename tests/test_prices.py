@@ -15,7 +15,8 @@ def test_quantity_without_number_more():
 
 
 test_quantity_parameter_list = [
-    ("Whole Foods Market™ Organic Pine Nuts, 4 oz",(4, "oz")),
+    ("Adams 16 Ounce Creamy Peanu Butter", (16, "oz")),
+    ("Whole Foods Market™ Organic Pine Nuts, 4 oz", (4, "oz")),
     ("Mission White Corn Tortillas - 30 Count", (30, "count")),
     (" POUND ", (16, "oz")),
     (" 100 pack ", (100, "pack")),
@@ -128,14 +129,14 @@ def test_quantity(test_input, expected):
 
 
 test_unit_price_parameter_list = [
-    (" 0.49/pound ", (0.49/16, "oz")),
-    (" .49/pound ", (0.49/16, "oz")),
-    (" Price.49/lb ", (0.49/16, "oz")),
-    (" Price .49/lb ", (0.49/16, "oz")),
-    (" .49/lb ", (0.49/16, "oz")),
-    (" 49¢/lb ", (0.49/16, "oz")),
-    (" 49¢ /lb ", (0.49/16, "oz")),
-    (" Price 49¢ /lb ", (0.49/16, "oz")),
+    (" 0.49/pound ", (0.49 / 16, "oz")),
+    (" .49/pound ", (0.49 / 16, "oz")),
+    (" Price.49/lb ", (0.49 / 16, "oz")),
+    (" Price .49/lb ", (0.49 / 16, "oz")),
+    (" .49/lb ", (0.49 / 16, "oz")),
+    (" 49¢/lb ", (0.49 / 16, "oz")),
+    (" 49¢ /lb ", (0.49 / 16, "oz")),
+    (" Price 49¢ /lb ", (0.49 / 16, "oz")),
     ("1.99/bunch", (1.99, "bunch")),
     ("$7.99 / 300 ML", (7.99 / (300 * 1 / 29.5735), "oz")),
     ("$14.69 / 250 ML", (14.69 / (250 * 1 / 29.5735), "oz")),
