@@ -274,6 +274,8 @@ class UnitPrice:
         .*?
         (?P<dollars>[\.\d]+)
         \s*
+        (?P<cents>¢)?
+        \s*
         (?:
         / | per | -
         )*
@@ -297,7 +299,7 @@ class UnitPrice:
 
     @classmethod
     def _convert_oz(cls, qty, unit):
-        if unit == "lb":
+        if unit in ["lb", "lbs", "pound", "pounds"]:
             qty /= cls.OZ_PER_LB
             unit = "oz"
             return qty, unit
@@ -309,7 +311,7 @@ class UnitPrice:
             qty *= cls.ML_PER_OZ
             unit = "oz"
             return qty, unit
-        elif unit in ["qt", "quart", "quarts"]:
+        elif unit in ["qt", "qts", "quart", "quarts"]:
             qty /= cls.OZ_PER_QUART
             unit = "oz"
             return qty, unit
@@ -325,6 +327,8 @@ class UnitPrice:
         if match := re.match(cls.pat_unit_price, text):
             cls.logger.debug('matched pat_unit_price')
             dollars = float(match.group("dollars"))
+            if match.group("cents"):
+                dollars /= 100 
             qty = float(match.group("qty") or 1)
             unit = match.group("unit")
             if unit:
@@ -335,6 +339,7 @@ class UnitPrice:
                     unit = "bunch"
             cls.logger.debug(f"{dollars=},{qty=},{unit=}")
             qty, unit = cls._convert_oz(dollars / qty, unit)
+            cls.logger.debug(f"{qty}/{unit}")
             return (qty, unit)
         raise CaculateUnitPriceException(f"can't generate unit price from text '{orig}'")
 
