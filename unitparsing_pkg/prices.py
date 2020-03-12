@@ -264,7 +264,9 @@ class UnitPrice:
         \s*
         /?
         \s*
-        LBs?\b
+        (?:
+        LBs?\b | pounds?\b
+        )
         """,
         re.IGNORECASE | re.VERBOSE,
     )
@@ -283,7 +285,7 @@ class UnitPrice:
         (?P<qty>[\.\d]+)?
         \s*
         (?P<unit>
-        lb 
+        lb\b | pound\b
         | oz 
         | \bbunch\b
         | \bpk\b | \bpack\b
@@ -391,13 +393,6 @@ class UnitPrice:
             unit = match.group("unit").strip()
             return cls.doit(number, qty, unit)
 
-        elif match := re.match(cls.pat_no_number_multi, text):
-            cls.logger.debug("regex matches on 'pat_no_number_multi'")
-            number = 1
-            qty = 1
-            unit = match.group("unit").strip()
-            return cls.doit(number, qty, unit)
-
         elif match := re.match(cls.pat_bunch, text):
             cls.logger.debug("regex matches on 'pat_bunch'")
             qty = frac(match.group("qty"))
@@ -453,6 +448,13 @@ class UnitPrice:
             cls.logger.debug("regex matches on 'pat_pack'")
             qty = frac(match.group("qty"))
             result = Bundle(qty, "pack")
+
+        elif match := re.match(cls.pat_no_number_multi, text):
+            cls.logger.debug("regex matches on 'pat_no_number_multi'")
+            number = 1
+            qty = 1
+            unit = match.group("unit").strip()
+            return cls.doit(number, qty, unit)
 
         else:
             raise ParseQuantityException(f"can't match quantity on string '{text}'")
