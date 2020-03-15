@@ -24,5 +24,5 @@ v = UnitPrice.unit_price(f"5.49/lb")
 v = UnitPrice.unit_price(f"0.49/pound")
 
 b = UnitPrice.quantity(" pound ")
-y = 0.49/b.amount
+y = 0.49 / b.amount
 v = UnitPrice.unit_price(f"{y}/{b.unit}")

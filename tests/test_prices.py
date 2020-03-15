@@ -6,15 +6,17 @@ from unitparsing_pkg.prices import (Bundle, CaculateUnitPriceException,
 
 @pytest.mark.xfail
 def test_quantity_without_number_more():
+    assert Bundle(128, "oz") == UnitPrice.quantity("DR.PT")
+    assert Bundle(1, "oz") == UnitPrice.quantity("fl.oz")
     assert Bundle(128, "oz") == UnitPrice.quantity("fl.gal")
     assert Bundle(128, "oz") == UnitPrice.quantity("  fl.  gal   ")
     assert Bundle(128, "oz") == UnitPrice.quantity("  fl.    gal   ")
-    assert Bundle(1, "oz") == UnitPrice.quantity("fl.oz")
     assert Bundle(1, "oz") == UnitPrice.quantity("  fl.  oz   ")
     assert Bundle(1, "oz") == UnitPrice.quantity("  fl.    oz   ")
 
 
 test_quantity_parameter_list = [
+    ("Signature Farms Hass Avocados - 6 Count", (6, "count")),
     ("Adams 16 Ounce Creamy Peanu Butter", (16, "oz")),
     ("Whole Foods Market™ Organic Pine Nuts, 4 oz", (4, "oz")),
     ("Mission White Corn Tortillas - 30 Count", (30, "count")),
@@ -129,6 +131,7 @@ def test_quantity(test_input, expected):
 
 
 test_unit_price_parameter_list = [
+    ("($1.33 / Count)", (1.33, "count")),
     (" 0.49/pound ", (0.49 / 16, "oz")),
     (" .49/pound ", (0.49 / 16, "oz")),
     (" Price.49/lb ", (0.49 / 16, "oz")),
@@ -151,6 +154,7 @@ test_unit_price_parameter_list = [
     ("5.49 / pt", (5.49 / 16, "oz")),
     ("5.49 / pint", (5.49 / 16, "oz")),
     ("5.49 / oz", (5.49, "oz")),
+    ("1.67/OUNCE", (1.67, "oz")),
     ("5.49/lb", (5.49 / 16, "oz")),
     ("5.49 each", (5.49, "each")),
     ("5.49 / each", (5.49, "each")),

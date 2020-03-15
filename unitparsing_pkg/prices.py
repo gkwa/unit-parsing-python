@@ -2,8 +2,6 @@
 >>> b = UnitPrice.quantity("1/2 / lb")
 >>> b.amount
 8.0
->>> b.unit
-'oz'
 >>> b.unit=='oz'
 True
 >>> from unitparsing_pkg.prices import Bundle, UnitPrice
@@ -13,10 +11,8 @@ True
 
 import fractions
 import logging
-import pathlib
 import pprint
 import re
-
 
 
 class ParseQuantityException(Exception):
@@ -32,7 +28,7 @@ class Bundle:
         self.logger = logging.getLogger(__name__)
         self.amount = amount
         self.unit = unit
-        self.logger.debug(f"{self.amount=}")
+        self.logger.debug(self)
 
     def __repr__(self):
         return f"Bundle({self.amount!r}, {self.unit!r})"
@@ -168,7 +164,7 @@ class UnitPrice:
         r"""
         [^\d\.]*
         \s*
-        (?P<unit> 
+        (?P<unit>
           LBs?\b | pounds?\b
           | OZs?\b | ounces?\b
           | gals?\b | gallons?\b
@@ -288,7 +284,7 @@ class UnitPrice:
         \s*
         (?P<unit>
         lb\b | pound\b
-        | oz 
+        | ozs?\b | ounces?\b
         | \bbunch\b
         | \bpk\b | \bpack\b
         | \bqts?\b | \bquarts?\b
@@ -311,6 +307,9 @@ class UnitPrice:
             qty /= cls.OZ_PER_PINT
             unit = "oz"
             return qty, unit
+        elif unit in ["ounce", "ounces", "oz"]:
+            unit = "oz"
+            return qty, unit
         elif unit in ["ml", "milliliter"]:
             qty *= cls.ML_PER_OZ
             unit = "oz"
@@ -329,10 +328,10 @@ class UnitPrice:
         text = text.lower()
 
         if match := re.match(cls.pat_unit_price, text):
-            cls.logger.debug('matched pat_unit_price')
+            cls.logger.debug("matched pat_unit_price")
             dollars = float(match.group("dollars"))
             if match.group("cents"):
-                dollars /= 100 
+                dollars /= 100
             qty = float(match.group("qty") or 1)
             unit = match.group("unit")
             if unit:
@@ -345,7 +344,9 @@ class UnitPrice:
             qty, unit = cls._convert_oz(dollars / qty, unit)
             cls.logger.debug(f"{qty}/{unit}")
             return (qty, unit)
-        raise CaculateUnitPriceException(f"can't generate unit price from text '{orig}'")
+        raise CaculateUnitPriceException(
+            f"can't generate unit price from text '{orig}'"
+        )
 
     @classmethod
     def doit(cls, number, qty, unit):
