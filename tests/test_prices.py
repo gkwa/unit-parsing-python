@@ -3,16 +3,28 @@ import pytest
 from unitparsing_pkg.prices import (Bundle, CaculateUnitPriceException,
                                     ParseQuantityException, UnitPrice)
 
+test_quantity_parameter_list_expected_fail_list = [
+    ("fl.gal", (128, "oz")),
+    ("  fl.  gal   ", (128, "oz")),
+    ("  fl.    gal   ", ("oz")),
+    ("  fl.  oz   ", ("oz")),
+    ("  fl.    oz   ", ("oz")),
+    ("DRPT", (16, "oz")),
+    ("DR.PT.", (16, "oz")),
+    ("DR. PT.", (16, "oz")),
+    (" DR.PT.", (16, "oz")),
+    ("DR.PT", (16, "oz")),
+    ("DR-PT", (16, "oz")),
+]
 
-@pytest.mark.xfail
-def test_quantity_without_number_more():
-    assert Bundle(128, "oz") == UnitPrice.quantity("DR.PT")
-    assert Bundle(1, "oz") == UnitPrice.quantity("fl.oz")
-    assert Bundle(128, "oz") == UnitPrice.quantity("fl.gal")
-    assert Bundle(128, "oz") == UnitPrice.quantity("  fl.  gal   ")
-    assert Bundle(128, "oz") == UnitPrice.quantity("  fl.    gal   ")
-    assert Bundle(1, "oz") == UnitPrice.quantity("  fl.  oz   ")
-    assert Bundle(1, "oz") == UnitPrice.quantity("  fl.    oz   ")
+
+@pytest.mark.parametrize(
+    "test_input,expected", test_quantity_parameter_list_expected_fail_list
+)
+def test_quantity_without_number_more(test_input, expected):
+    amount, unit = expected[0], expected[1]
+    with pytest.raises((ParseQuantityException, ValueError)):
+        assert Bundle(amount, unit) == UnitPrice.quantity(test_input)
 
 
 test_quantity_parameter_list = [
