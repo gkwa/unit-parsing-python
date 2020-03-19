@@ -68,10 +68,10 @@ class UnitPrice:
     pat_oz_2 = re.compile(
         r"""
         .*?
-        (?P<qty>[\.\d/]+)
+        (?P<qty>[\.\d/]*)
         \s*
         (?:
-        OZs?\b | ounces?\b
+        FL.OZs?\b | OZs?\b | ounces?\b
         )
         """,
         re.IGNORECASE | re.VERBOSE,

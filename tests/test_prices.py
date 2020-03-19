@@ -28,6 +28,7 @@ def test_quantity_without_number_more(test_input, expected):
 
 
 test_quantity_parameter_list = [
+    ("fl.oz", (1, "oz")),
     ("Signature Farms Hass Avocados - 6 Count", (6, "count")),
     ("Adams 16 Ounce Creamy Peanu Butter", (16, "oz")),
     ("Whole Foods Market™ Organic Pine Nuts, 4 oz", (4, "oz")),
@@ -47,6 +48,10 @@ test_quantity_parameter_list = [
     ("Pacific Coast Style Clam Chowder Soup - 23ct ", (23, "count")),
     ("Pacific Coast Style Clam Chowder Soup - 23 ct", (23, "count")),
     ("De Nigris Vinegar Balsamic Bronze Eagle - 16.9 Fl. Oz.", (16.9, "oz")),
+    ("Fairlife Milk Ultra-Filtered Whole - 52 Fl. Oz.", (52, "oz")),
+    ("FlOz", (1, "oz")),
+    ("Fl.Oz", (1, "oz")),
+    ("Fl.Oz.", (1, "oz")),
     ("Seedless Mini Watermelon - 12 Each 13ea ", (12, "each")),
     ("Seedless Mini Watermelon - 12 Each 13 each", (12, "each")),
     ("Seedless Mini Watermelon - 12 Each", (12, "each")),
