@@ -351,6 +351,7 @@ class UnitPrice:
     @classmethod
     def doit(cls, number, qty, unit):
         unit = unit.lower().strip()
+        cls.logger.debug(f"{unit=}")
         if unit in ["pt", "pint", "pints"]:
             result = Bundle(number * qty * cls.OZ_PER_PINT, "oz")
         elif unit in ["ml", "mls", "milliliter", "milliliters"]:
@@ -391,8 +392,15 @@ class UnitPrice:
 
         elif match := re.match(cls.pat_multi, text):
             cls.logger.debug("regex matches on 'pat_multi'")
-            number = float(frac(match.group("num") or "1"))
-            qty = frac(match.group("qty") or "1")
+
+            number_pre = match.group("num") or "1"
+            cls.logger.debug(f"{number_pre=}")
+            number = float(frac(number_pre))
+
+            qty_pre = match.group("qty") or "1"
+            cls.logger.debug(f"{number=},{qty_pre=}")
+            qty = float(frac(qty_pre))
+
             unit = match.group("unit").strip()
             return cls.doit(number, qty, unit)
 
@@ -441,7 +449,9 @@ class UnitPrice:
 
         elif match := re.match(cls.pat_oz_2, text):
             cls.logger.debug("regex matches on 'pat_oz_2'")
-            qty = frac(match.group("qty"))
+            qty_pre = match.group("qty") or "1"
+            cls.logger.debug(f"{qty_pre=}")
+            qty = frac(qty_pre)
             result = Bundle(qty, "oz")
 
         elif match := re.match(cls.pat_oz_5, text):
